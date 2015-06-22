@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Firebase Chat Application</title>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+ 
+    <style>
+        .container {
+            max-width: 700px;
+        }
+ 
+        #comments-container {
+            border: 1px solid #d0d0d0;
+            height: 400px;
+            overflow-y: scroll;
+        }
+ 
+        .comment-container {
+            padding: 10px;
+            margin:6px;
+            background: #f5f5f5;
+            font-size: 13px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+        }
+ 
+        .comment-container .label {
+            margin-right: 20px;
+        }
+ 
+        .comment-container:last-of-type {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+ 
+    <div class="container">
+ 
+        <h1>Firebase Chat Application</h1>
+ 
+        <div class="panel panel-default">
+ 
+            <div class="panel-body">
+                <div id="comments-container"></div>
+            </div>
+ 
+            <div class="panel-footer">
+ 
+                <form role="form">
+                    <div class="form-group">
+                        <label for="comments">Please enter your comments here</label>
+                        <input class="form-control" id="comments" name="comments">
+                    </div>
+ 
+                    <button type="submit" id="submit-btn" name="submit-btn"
+                        class="btn btn-success">Send Comments</button>
+ 
+                    <button type="reset" class="btn btn-danger">Clear Comments</button>
+                </form>
+ 
+            </div>
+        </div>
+    </div>
+ 
+    <script src="http://cdn.firebase.com/js/client/2.2.7/firebase.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script>
+ 
+        var fireBaseRef = new Firebase("https://hellolu.firebaseio.com/");
+ 
+        $("#submit-btn").bind("click", function() {
+            var comment = $("#comments");
+            var commentValue = $.trim(comment.val());
+ 
+            if (commentValue.length === 0) {
+                alert('Comments are required to continue!');
+            } else {
+                fireBaseRef.push({comment: commentValue}, function(error) {
+                    if (error !== null) {
+                        alert('Unable to push comments to Firebase!');
+                    }
+                });
+ 
+                comment.val("");
+            }
+ 
+            return false;
+        });
+ 
+        fireBaseRef.on('child_added', function(snapshot) {
+            var uniqName = snapshot.name();
+            var comment = snapshot.val().comment;
+            var commentsContainer = $('#comments-container');
+ 
+            $('<div/>', {class: 'comment-container'})
+                .html('<span class="label label-default">Comment ' 
+                    + uniqName + '</span>' + comment).appendTo(commentsContainer);
+ 
+            commentsContainer.scrollTop(commentsContainer.prop('scrollHeight'));
+        });
+ 
+    </script>
+</body>
+</html>
